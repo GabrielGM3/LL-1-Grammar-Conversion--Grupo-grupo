@@ -202,7 +202,15 @@ class Grammar:
 
     def build_start(self) -> None:
         """Associe a cada produção seu conjunto START."""
-        raise NotImplementedError("implemente START")
+        self.start = {}
+
+        for prod in self.productions:
+            first_nonterminal = self.first_of_sequence(prod.rhs)
+
+            if EPSILON in first_nonterminal:
+                self.start[prod] = (first_nonterminal - {EPSILON}) | self.follow[prod.lhs]
+            else:
+                self.start[prod] = set(first_nonterminal)
 
     def build_sets(self) -> None:
         self.build_first()
