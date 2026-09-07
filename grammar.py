@@ -176,8 +176,29 @@ class Grammar:
                     mudou = True
 
     def build_follow(self) -> None:
-        """Preencha self.follow; FIRST deve ter sido calculado antes."""
-        raise NotImplementedError("implemente FOLLOW")
+        self.follow = {nonterminal: set() for nonterminal in self.nonterminals}
+        self.follow[self.start_symbol].add(EOF)
+
+        mudou=True
+
+        while mudou:
+            mudou=False
+            for prods in self.productions :
+                trailer=set(self.follow[prods.lhs])
+
+                for symbol in reversed(prods.rhs):
+                    if symbol in self.nonterminals:
+                        tamanho_antes= len(self.follow[symbol])
+                        self.follow[symbol].update(trailer)
+                        if len(self.follow[symbol]) > tamanho_antes:
+                            mudou= True
+
+                        if EPSILON in self.first[symbol]:
+                            trailer.update(self.first[symbol]-{EPSILON})
+                        else:
+                            trailer=set(self.first[symbol] - {EPSILON})
+                    else:
+                        trailer={symbol}
 
     def build_start(self) -> None:
         """Associe a cada produção seu conjunto START."""
