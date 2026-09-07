@@ -140,14 +140,18 @@ class Grammar:
 
     def first_of_sequence(self, symbols: tuple[str, ...]) -> set[str]:
         result=set()
+
         all_nulable=True
 
         for symbol in symbols:
             if symbol not in self.nonterminals:
+
                 result.add(symbol)
                 all_nulable=False
                 break
+
             else:
+
                 symbol_first= self.first.get(symbol, set())
                 result.update(symbol_first - {EPSILON})
 
@@ -160,13 +164,18 @@ class Grammar:
 
         return result
 
+
     def build_first(self) -> None:
+
         self.first={nonterminal: set() for nonterminal in self.nonterminals}
+
         mudou= True
 
         while mudou:
             mudou=False
+
             for prods in self.productions :
+
                 sequencia_first=self.first_of_sequence(prods.rhs)
                 tamanho_antes= len(self.first[prods.lhs])
 
@@ -175,14 +184,22 @@ class Grammar:
                 if len(self.first[prods.lhs]) > tamanho_antes:
                     mudou = True
 
+
+
+
+
+
     def build_follow(self) -> None:
         self.follow = {nonterminal: set() for nonterminal in self.nonterminals}
+
         self.follow[self.start_symbol].add(EOF)
 
         mudou=True
 
         while mudou:
+
             mudou=False
+
             for prods in self.productions :
                 trailer=set(self.follow[prods.lhs])
 
@@ -197,18 +214,24 @@ class Grammar:
                             trailer.update(self.first[symbol]-{EPSILON})
                         else:
                             trailer=set(self.first[symbol] - {EPSILON})
+
                     else:
                         trailer={symbol}
 
-    def build_start(self) -> None:
-        """Associe a cada produção seu conjunto START."""
-        self.start = {}
 
-        for prod in self.productions:
-            first_nonterminal = self.first_of_sequence(prod.rhs)
+
+
+
+
+    def build_start(self) -> None:
+        self.start={}
+
+        for prod in self.productions :
+            first_nonterminal=self.first_of_sequence(prod.rhs)
 
             if EPSILON in first_nonterminal:
                 self.start[prod] = (first_nonterminal - {EPSILON}) | self.follow[prod.lhs]
+
             else:
                 self.start[prod] = set(first_nonterminal)
 
@@ -220,12 +243,16 @@ class Grammar:
     def eliminate_direct_left_recursion(self, nonterminal: str) -> bool:
         productions=self.productions_for(nonterminal)
 
+
         alphas: list[tuple[str, ...]]=[]
         betas: list[tuple[str, ...]] = []
 
+
         for prod in productions:
+
             if prod.rhs and prod.rhs[0] == nonterminal:
                 alphas.append(prod.rhs[1:])
+
             else:
                 betas.append( prod.rhs)
 
@@ -233,6 +260,7 @@ class Grammar:
             return False
 
         helper= self._fresh_nonterminal(nonterminal)
+
         self._insert_nonterminal_after(nonterminal, helper)
 
         novas_alternativas_base: list[tuple[str, ...]] = [
@@ -250,9 +278,12 @@ class Grammar:
 
         return True
 
+
+
     def eliminate_all_direct_left_recursion(self) -> None:
         for nonterminal in list(self.nonterminals):
             self.eliminate_direct_left_recursion(nonterminal)
+
 
     def left_factor_once(self, nonterminal: str) -> bool:
         """Infraestrutura fornecida: fatore um prefixo comum."""
